@@ -1,36 +1,36 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react'
 import {
   GetStaticPropsContext,
   GetStaticPathsContext,
   GetStaticPathsResult,
-} from 'next';
-import { ParsedUrlQuery, parse } from 'querystring';
+} from 'next'
+import { ParsedUrlQuery, parse } from 'querystring'
 
-import { useRouter } from 'next/router';
-import { getPrismicClient } from '../../services/prismic';
-import Post, { getStaticProps, getStaticPaths } from '../../pages/post/[slug]';
+import { useRouter } from 'next/router'
+import { getPrismicClient } from '../../services/prismic'
+import Post, { getStaticProps, getStaticPaths } from '../../pages/post/[slug]'
 
 interface Post {
-  first_publication_date: string | null;
+  first_publication_date: string | null
   data: {
-    title: string;
+    title: string
     banner: {
-      url: string;
-    };
-    author: string;
+      url: string
+    }
+    author: string
     content: {
-      heading: string;
-      body: Record<string, unknown>[];
-    }[];
-  };
+      heading: string
+      body: Record<string, unknown>[]
+    }[]
+  }
 }
 
 interface PostProps {
-  post: Post;
+  post: Post
 }
 
 interface GetStaticPropsResult {
-  props: PostProps;
+  props: PostProps
 }
 
 const mockedQueryReturn = {
@@ -42,7 +42,7 @@ const mockedQueryReturn = {
       uid: 'criando-um-app-cra-do-zero',
     },
   ],
-};
+}
 
 const mockedGetByUIDReturn = {
   uid: 'como-utilizar-hooks',
@@ -183,29 +183,29 @@ const mockedGetByUIDReturn = {
       },
     ],
   },
-};
+}
 
-jest.mock('@prismicio/client');
-jest.mock('../../services/prismic');
-jest.mock('next/router');
-const mockedUseRouter = useRouter as jest.Mock;
-const mockedPrismic = getPrismicClient as jest.Mock;
+jest.mock('@prismicio/client')
+jest.mock('../../services/prismic')
+jest.mock('next/router')
+const mockedUseRouter = useRouter as jest.Mock
+const mockedPrismic = getPrismicClient as jest.Mock
 
 describe('Post', () => {
   beforeAll(() => {
     mockedUseRouter.mockReturnValue({
       isFallback: false,
-    });
+    })
 
     mockedPrismic.mockReturnValue({
       getByUID: () => {
-        return Promise.resolve(mockedGetByUIDReturn);
+        return Promise.resolve(mockedGetByUIDReturn)
       },
       query: () => {
-        return Promise.resolve(mockedQueryReturn);
+        return Promise.resolve(mockedQueryReturn)
       },
-    });
-  });
+    })
+  })
 
   it('should be able to return prismic posts documents paths using getStaticPaths', async () => {
     const getStaticPathsReturn = [
@@ -219,65 +219,65 @@ describe('Post', () => {
           slug: 'criando-um-app-cra-do-zero',
         },
       },
-    ];
+    ]
 
-    const getStaticPathsContext: GetStaticPathsContext = {};
+    const getStaticPathsContext: GetStaticPathsContext = {}
 
     const response = (await getStaticPaths(
-      getStaticPathsContext
-    )) as GetStaticPathsResult;
+      getStaticPathsContext,
+    )) as GetStaticPathsResult
 
-    expect(response.paths).toEqual(getStaticPathsReturn);
-  });
+    expect(response.paths).toEqual(getStaticPathsReturn)
+  })
 
   it('should be able to return prismic post document using getStaticProps', async () => {
-    const routeParam = parse('como-utilizar-hooks');
+    const routeParam = parse('como-utilizar-hooks')
 
-    const postReturn = mockedGetByUIDReturn;
+    const postReturn = mockedGetByUIDReturn
     const getStaticPropsContext: GetStaticPropsContext<ParsedUrlQuery> = {
       params: routeParam,
-    };
+    }
 
     const response = (await getStaticProps(
-      getStaticPropsContext
-    )) as GetStaticPropsResult;
+      getStaticPropsContext,
+    )) as GetStaticPropsResult
 
-    expect(response.props.post).toEqual(postReturn);
-  });
+    expect(response.props.post).toEqual(postReturn)
+  })
 
   it('should be able to render post document info', () => {
-    const postProps = mockedGetByUIDReturn;
+    const postProps = mockedGetByUIDReturn
 
-    render(<Post post={postProps} />);
+    render(<Post post={postProps} />)
 
-    screen.getByText('Como utilizar Hooks');
-    screen.getByText('25 mar 2021');
-    screen.getByText('Joseph Oliveira');
-    screen.getByText('4 min');
+    screen.getByText('Como utilizar Hooks')
+    screen.getByText('25 mar 2021')
+    screen.getByText('Joseph Oliveira')
+    screen.getByText('4 min')
 
-    screen.getByText('Proin et varius');
-    screen.getByText(/Nullam dolor sapien/);
-    screen.getByText('Cras laoreet mi');
-    screen.getByText(/Ut varius quis velit sed cursus/);
-  });
+    screen.getByText('Proin et varius')
+    screen.getByText(/Nullam dolor sapien/)
+    screen.getByText('Cras laoreet mi')
+    screen.getByText(/Ut varius quis velit sed cursus/)
+  })
 
   it('should be able to render loading message if fallback', () => {
     mockedUseRouter.mockReturnValueOnce({
       isFallback: true,
-    });
+    })
 
-    const postProps = mockedGetByUIDReturn;
+    const postProps = mockedGetByUIDReturn
 
-    render(<Post post={postProps} />);
+    render(<Post post={postProps} />)
 
-    screen.getByText('Carregando...');
-  });
+    screen.getByText('Carregando...')
+  })
 
   it('should be able to render Header component', () => {
-    const postProps = mockedGetByUIDReturn;
+    const postProps = mockedGetByUIDReturn
 
-    render(<Post post={postProps} />);
+    render(<Post post={postProps} />)
 
-    screen.getByAltText('logo');
-  });
-});
+    screen.getByAltText('logo')
+  })
+})

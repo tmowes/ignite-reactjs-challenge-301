@@ -29,7 +29,14 @@ body {
   background: var(--background);
   color: var(--body);
 }
-
+body,
+input,
+textarea,
+select,
+button {
+  font: 400 1rem 'Inter', -apple-system, sans-serif;
+  border: 0;
+}
 h1,
 h2,
 h3,
@@ -37,21 +44,14 @@ h4,
 h5,
 h6,
 strong {
-  font-weight: 500;
+  font-weight: 700;
 }
 a {
   text-decoration: none;
   background: none;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   border: 0;
   transition: 180ms ease-in-out;
   color: inherit;
-  &:hover {
-    text-decoration: underline;
-  }
 }
-
-
-
-// TODO
