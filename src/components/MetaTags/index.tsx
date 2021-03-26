@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable  */
 import Head from 'next/head'
 import { MetaTagsProps } from './types'
 

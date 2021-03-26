@@ -1,7 +1,9 @@
 import { GetStaticProps } from 'next'
 import Prismic from '@prismicio/client'
 import { format, parseISO } from 'date-fns'
-// import ptBR from 'date-fns/locale/pt-BR'
+import { FiUser, FiCalendar } from 'react-icons/fi'
+
+import ptBR from 'date-fns/locale/pt-BR'
 
 import Link from 'next/link'
 import { useState } from 'react'
@@ -54,21 +56,25 @@ export default function Home(props: HomeProps) {
   return (
     <>
       <Header />
-
       <main className={styles.container}>
         <section>
           {posts.map(({ data, uid, first_publication_date }) => {
             const formatDate = format(
               parseISO(first_publication_date),
               "dd' 'LLL' 'yyyy",
+              {
+                locale: ptBR,
+              },
             )
             return (
               <Link key={uid} href={`/post/${uid}`}>
                 <a>
                   <h1>{data.title}</h1>
-                  <p>{data.subtitle}</p>
+                  <h2>{data.subtitle}</h2>
                   <div>
+                    <FiCalendar />
                     <time>{formatDate.toLowerCase()}</time>
+                    <FiUser />
                     <span>{data.author}</span>
                   </div>
                 </a>

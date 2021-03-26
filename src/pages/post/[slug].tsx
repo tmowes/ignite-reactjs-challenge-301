@@ -35,11 +35,13 @@ interface PostProps {
 }
 
 export default function Post(props: PostProps) {
-  const { post } = props
+  const {
+    post: { first_publication_date, data },
+  } = props
   const { isFallback } = useRouter()
 
   const calculateReadTime = () => {
-    const arrayOfWords = post.data.content.reduce((acc, cur) => {
+    const arrayOfWords = data.content.reduce((acc, cur) => {
       const words = RichText.asText(cur.body).split(' ')
       return [...acc, ...words]
     }, [])
@@ -54,26 +56,26 @@ export default function Post(props: PostProps) {
     <>
       <Header />
       <main className={styles.container}>
-        <img src={post.data.banner.url} alt="banner" />
+        <img src={data.banner.url} alt="banner" />
         <article>
-          <h1>{post.data.title}</h1>
+          <h1>{data.title}</h1>
           <section>
             <time>
               <FiCalendar />
-              {format(new Date(post.first_publication_date), 'dd LLL yyyy', {
+              {format(new Date(first_publication_date), 'dd LLL yyyy', {
                 locale: ptBR,
               })}
             </time>
             <p>
               <FiUser />
-              {post.data.author}
+              {data.author}
             </p>
             <p>
               <FiClock />
               {`${calculateReadTime()} min`}
             </p>
           </section>
-          {post.data.content.map(({ heading, body }) => (
+          {data.content.map(({ heading, body }) => (
             <div key={heading}>
               <h2>{heading}</h2>
               <div
@@ -90,7 +92,7 @@ export default function Post(props: PostProps) {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const prismic = getPrismicClient()
-  const postsResponse = await prismic.query(
+  const { results } = await prismic.query(
     [Prismic.predicates.at('document.type', 'post')],
     {
       fetch: ['post.title', 'post.subtitle', 'post.author'],
@@ -98,7 +100,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     },
   )
   return {
-    paths: postsResponse.results.map(post => {
+    paths: results.map(post => {
       return {
         params: {
           slug: post.uid,
