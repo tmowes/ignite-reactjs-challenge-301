@@ -7,7 +7,7 @@ import ptBR from 'date-fns/locale/pt-BR'
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Header, MetaTags } from '../components'
+import { Header, MetaTags, ExitPreviewButton } from '../components'
 import { getPrismicClient } from '../services/prismic'
 
 import styles from './home.module.scss'
@@ -29,11 +29,13 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination
+  preview: boolean
 }
 
 export default function Home(props: HomeProps) {
   const {
     postsPagination: { next_page, results },
+    preview = false,
   } = props
 
   const [posts, setPosts] = useState(results)
@@ -84,18 +86,23 @@ export default function Home(props: HomeProps) {
             </button>
           </section>
         )}
+        {preview && <ExitPreviewButton />}
       </main>
     </>
   )
 }
 
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = async ({
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient()
   const { results, next_page } = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['title', 'subtitle', 'author'],
       pageSize: 3,
+      ref: previewData?.ref ?? null,
     },
   )
 
@@ -105,6 +112,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         next_page,
         results,
       },
+      preview,
     },
   }
 }

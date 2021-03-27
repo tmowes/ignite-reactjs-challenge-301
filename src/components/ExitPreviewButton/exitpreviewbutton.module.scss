@@ -1,0 +1,14 @@
+.container{
+  margin: 0 auto;
+  max-width: 720px;
+  height: 3.625rem;
+  color: var(--background);
+  background-color: var(--heading);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  margin-bottom: 5rem;
+}

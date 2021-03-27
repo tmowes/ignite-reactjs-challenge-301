@@ -8,7 +8,12 @@ import { FiUser, FiCalendar, FiClock } from 'react-icons/fi'
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { Header, CommentsSection, MetaTags } from '../../components'
+import {
+  Header,
+  CommentsSection,
+  MetaTags,
+  ExitPreviewButton,
+} from '../../components'
 import { getPrismicClient } from '../../services/prismic'
 
 // import commonStyles from '../../styles/common.module.scss'
@@ -17,6 +22,7 @@ import styles from './post.module.scss'
 interface Post {
   uid?: string
   first_publication_date: string | null
+  last_publication_date: string | null
   data: {
     title: string
     banner: {
@@ -36,16 +42,20 @@ interface PostProps {
   post: Post
   prevPost: Post
   nextPost: Post
+  preview: boolean
 }
 
 export default function Post(props: PostProps) {
   const {
     prevPost,
-    post: { first_publication_date, data },
+    post: { first_publication_date, last_publication_date, data },
     nextPost,
+    preview,
   } = props
 
   const { isFallback } = useRouter()
+
+  const showEditDate = last_publication_date !== first_publication_date
 
   const estimatedReadTime = useMemo(() => {
     if (isFallback) {
@@ -82,20 +92,35 @@ export default function Post(props: PostProps) {
         <article className={styles.postContainer}>
           <h1>{data.title}</h1>
           <section>
-            <FiCalendar />
-            <time>
-              {format(new Date(first_publication_date), 'dd MMM yyyy', {
-                locale: ptBR,
-              })}
-            </time>
-            <FiUser />
-            <p>{data.author}</p>
-            <FiClock />
-            <p>{`${estimatedReadTime} min`}</p>
+            <div className={styles.postInfo}>
+              <FiCalendar />
+              <time>
+                {format(new Date(first_publication_date), 'dd MMM yyyy', {
+                  locale: ptBR,
+                })}
+              </time>
+              <FiUser />
+              <p>{data.author}</p>
+              <FiClock />
+              <p>{`${estimatedReadTime} min`}</p>
+            </div>
+            {showEditDate && (
+              <div className={styles.editInfo}>
+                <time>
+                  {format(
+                    new Date(last_publication_date),
+                    "'* editado em 'dd' 'MMM' 'yyyy', às 'hh':'mm",
+                    {
+                      locale: ptBR,
+                    },
+                  )}
+                </time>
+              </div>
+            )}
           </section>
-          {data.content.map(({ heading, body }, i) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <div key={`${heading}${i}`} className={styles.postContent}>
+
+          {data.content.map(({ heading, body }) => (
+            <div key={`${heading}`} className={styles.postContent}>
               <h2>{heading}</h2>
               <div
                 // eslint-disable-next-line react/no-danger
@@ -106,13 +131,15 @@ export default function Post(props: PostProps) {
         </article>
         <div className={styles.footer}>
           <div className={styles.pagination}>
-            {prevPost && (
+            {prevPost ? (
               <Link href={`/post/${prevPost.uid}`}>
                 <a className={styles.prevPost}>
                   <span>{prevPost.data.title}</span>
                   <strong>Post anterior</strong>
                 </a>
               </Link>
+            ) : (
+              <div />
             )}
             {nextPost && (
               <Link href={`/post/${nextPost.uid}`}>
@@ -124,6 +151,7 @@ export default function Post(props: PostProps) {
             )}
           </div>
           <CommentsSection />
+          {preview && <ExitPreviewButton />}
         </div>
       </main>
     </>
@@ -148,14 +176,23 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 }
 
-export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<PostProps> = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const { slug } = params
+
   const prismic = getPrismicClient()
-  const { first_publication_date, data, uid, id } = await prismic.getByUID(
-    'posts',
-    String(slug),
-    {},
-  )
+  const {
+    first_publication_date = null,
+    data,
+    uid,
+    id,
+    last_publication_date,
+  } = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  })
 
   const prevPost =
     (
@@ -179,9 +216,10 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
 
   return {
     props: {
-      post: { first_publication_date, data, uid },
+      post: { last_publication_date, first_publication_date, data, uid },
       prevPost,
       nextPost,
+      preview,
     },
     revalidate: 60 * 30, // 30 minutes
   }
