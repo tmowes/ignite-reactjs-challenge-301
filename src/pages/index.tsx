@@ -1,16 +1,15 @@
 import { GetStaticProps } from 'next'
 import Prismic from '@prismicio/client'
-import { format, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 import { FiUser, FiCalendar } from 'react-icons/fi'
 
 import ptBR from 'date-fns/locale/pt-BR'
 
 import Link from 'next/link'
 import { useState } from 'react'
-import Header from '../components/Header'
+import { Header, MetaTags } from '../components'
 import { getPrismicClient } from '../services/prismic'
 
-// import commonStyles from '../styles/common.module.scss'
 import styles from './home.module.scss'
 
 interface Post {
@@ -55,35 +54,31 @@ export default function Home(props: HomeProps) {
 
   return (
     <>
+      <MetaTags title="Home" />
       <Header />
       <main className={styles.container}>
-        <section>
-          {posts.map(({ data, uid, first_publication_date }) => {
-            const formatDate = format(
-              parseISO(first_publication_date),
-              "dd' 'LLL' 'yyyy",
-              {
-                locale: ptBR,
-              },
-            )
-            return (
-              <Link key={uid} href={`/post/${uid}`}>
-                <a>
-                  <h1>{data.title}</h1>
-                  <h2>{data.subtitle}</h2>
-                  <div>
-                    <FiCalendar />
-                    <time>{formatDate.toLowerCase()}</time>
-                    <FiUser />
-                    <span>{data.author}</span>
-                  </div>
-                </a>
-              </Link>
-            )
-          })}
-        </section>
+        {posts.map(({ data, uid, first_publication_date }) => (
+          <section className={styles.postSection}>
+            <Link key={uid} href={`/post/${uid}`}>
+              <a>
+                <h1>{data.title}</h1>
+                <h2>{data.subtitle}</h2>
+                <section>
+                  <FiCalendar />
+                  <time>
+                    {format(new Date(first_publication_date), 'dd LLL yyyy', {
+                      locale: ptBR,
+                    })}
+                  </time>
+                  <FiUser />
+                  <span>{data.author}</span>
+                </section>
+              </a>
+            </Link>
+          </section>
+        ))}
         {nextPage && (
-          <section>
+          <section className={styles.nextSection}>
             <button type="button" onClick={loadMorePosts}>
               <strong>Carregar mais posts</strong>
             </button>
@@ -97,10 +92,10 @@ export default function Home(props: HomeProps) {
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const prismic = getPrismicClient()
   const { results, next_page } = await prismic.query(
-    [Prismic.predicates.at('document.type', 'post')],
+    [Prismic.predicates.at('document.type', 'posts')],
     {
-      fetch: ['post.title', 'post.subtitle', 'post.author'],
-      pageSize: 1,
+      fetch: ['title', 'subtitle', 'author'],
+      pageSize: 3,
     },
   )
 

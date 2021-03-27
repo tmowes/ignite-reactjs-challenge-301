@@ -1,5 +1,54 @@
-.container{
+.container {
   max-width: 720px;
   margin: 0 auto;
   padding: 5rem 0 3.5rem;
+  section a {
+    margin-top: 10rem;
+  }
+}
+
+.postSection {
+  margin: 3rem 0;
+  h1 {
+    color: var(--heading);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  h2 {
+    color: var(--body);
+    font-size: 1.125rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+  section {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+    color: var(--info);
+    font-size: 0.875rem;
+    font-weight: 400;
+    svg {
+      margin-right: 0.5rem;
+      width: 20px;
+      height: 20px;
+    }
+    svg:not(:first-child){
+      margin-left: 1.5rem;
+    }
+  }
+}
+
+
+.nextSection{
+  margin-top: 4rem;
+  button {
+    background: none;
+    cursor: pointer;
+  }
+  strong {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--hightlight);
+  }
 }
