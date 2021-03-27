@@ -2,7 +2,7 @@ import { GetStaticPaths, GetStaticProps } from 'next'
 import { useRouter } from 'next/router'
 import Prismic from '@prismicio/client'
 import { RichText } from 'prismic-dom'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import ptBR from 'date-fns/locale/pt-BR'
 import { FiUser, FiCalendar, FiClock } from 'react-icons/fi'
 
@@ -16,7 +16,6 @@ import {
 } from '../../components'
 import { getPrismicClient } from '../../services/prismic'
 
-// import commonStyles from '../../styles/common.module.scss'
 import styles from './post.module.scss'
 
 interface Post {
@@ -57,6 +56,25 @@ export default function Post(props: PostProps) {
 
   const showEditDate = last_publication_date !== first_publication_date
 
+  const formattedPostDate = useMemo(() => {
+    return format(new Date(first_publication_date), 'dd MMM yyyy', {
+      locale: ptBR,
+    })
+  }, [first_publication_date])
+
+  const formattedEditTime = useMemo(() => {
+    if (last_publication_date) {
+      return format(
+        new Date(last_publication_date),
+        "'* editado em 'dd' 'MMM' 'yyyy', às 'hh':'mm",
+        {
+          locale: ptBR,
+        },
+      )
+    }
+    return ''
+  }, [last_publication_date])
+
   const estimatedReadTime = useMemo(() => {
     if (isFallback) {
       return 0
@@ -94,11 +112,7 @@ export default function Post(props: PostProps) {
           <section>
             <div className={styles.postInfo}>
               <FiCalendar />
-              <time>
-                {format(new Date(first_publication_date), 'dd MMM yyyy', {
-                  locale: ptBR,
-                })}
-              </time>
+              <time>{formattedPostDate}</time>
               <FiUser />
               <p>{data.author}</p>
               <FiClock />
@@ -106,15 +120,7 @@ export default function Post(props: PostProps) {
             </div>
             {showEditDate && (
               <div className={styles.editInfo}>
-                <time>
-                  {format(
-                    new Date(last_publication_date),
-                    "'* editado em 'dd' 'MMM' 'yyyy', às 'hh':'mm",
-                    {
-                      locale: ptBR,
-                    },
-                  )}
-                </time>
+                <p>{formattedEditTime}</p>
               </div>
             )}
           </section>

@@ -60,8 +60,11 @@ export default function Home(props: HomeProps) {
       <Header />
       <main className={styles.container}>
         {posts.map(({ data, uid, first_publication_date }) => (
-          <section className={styles.postSection}>
-            <Link key={uid} href={`/post/${uid}`}>
+          <section
+            className={styles.postSection}
+            key={`${uid}${first_publication_date}`}
+          >
+            <Link href={`/post/${uid}`}>
               <a>
                 <h1>{data.title}</h1>
                 <h2>{data.subtitle}</h2>
